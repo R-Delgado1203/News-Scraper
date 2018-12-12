@@ -14,12 +14,20 @@ app.use(express.json());
 app.use(express.static("public"));
 //mongoose.connect("mongodb://localhost/unit18Populater", { useNewUrlParser: true });
 
+// Handlebars
+app.engine(
+  "handlebars",
+  exphbs({
+    defaultLayout: "main"
+  })
+);
+app.set("view engine", "handlebars");
 
 // scrape GET route 
-app.get("/scrape", (req, res) => {
+app.get("/api/scrape", (req, res) => {
   axios.get("http://www.echojs.com/").then(function (response) {
     const $ = cheerio.load(response.data);
-    $("article h2").each(function(i, element) {
+    $("article h2").each(function (i, element) {
       let result = {};
       result.title = $(this)
         .children("a")
@@ -40,10 +48,12 @@ app.get("/scrape", (req, res) => {
 });
 
 // GET db data
-app.get("/articles", (req, res) => {
+app.get("/", (req, res) => {
   db.Article.find({})
     .then((dbArticle) => {
-      res.json(dbArticle);
+      let dbData = { articles: dbArticle };
+      //res.json(dbArticle);
+      res.render('home', dbData);
     })
     .catch((err) => {
       res.json(err);
