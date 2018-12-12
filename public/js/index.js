@@ -1,97 +1,51 @@
 $(document).ready(function () {
     let articleContainer = $(".article-container");
-    $(document).on("click", ".btn.save", handleArticleSave);
     $(document).on("click", ".scrape-new", handleArticleScrape);
-    $(".clear").on("click", handleArticleClear);
+    $(document).on("click", ".clear", handleArticleClear);
+    $(document).on("click", ".save", handleArticleSave);
 
-
-    function initPage() {
-        $.get("/").then(function (data) {
-            //console.log(data);
-            articleContainer.empty();
-            if (data && data.length) {
-                renderArticles(data);
-            } else {
-                renderEmpty();
-            }
-        });
-    }
-
-    function renderArticles(articles) {
-        let articleCards = [];
-        for (let i = 0; i < articles.length; i++) {
-            articleCards.push(createCard(articles[i]));
-        }
-        articleContainer.append(articleCards);
-    }
-
-    function createCard(article) {
-        let card = $("<div class='card'>");
-        let cardHeader = $("<div class='card-title'>").append(
-            $("<h3>").append(
-                $("<a class='article-link' target='_blank' rel='noopener noreferrer'>")
-                    .attr("href", article.url)
-                    .text(article.headline),
-                $("<a class='btn btn-success save'>Save Article</a>")
-            )
-        );
-
-        let cardBody = $("<div class='card-body'>").text(article.summary);
-
-        card.append(cardHeader, cardBody);
-        card.data("_id", article._id);
-        return card;
-    }
-
-    function renderEmpty() {
-        let emptyAlert = $(
-            [
-                "<div class='alert alert-warning text-center'>",
-                "<h4>Uh Oh. Looks like we don't have any new articles.</h4>",
-                "</div>",
-                "<div class='card'>",
-                "<div class='card-header text-center'>",
-                "<h3>What Would You Like To Do?</h3>",
-                "</div>",
-                "<div class='card-body text-center'>",
-                "<h4><a class='scrape-new'>Try Scraping New Articles</a></h4>",
-                "<h4><a href='/saved'>Go to Saved Articles</a></h4>",
-                "</div>",
-                "</div>"
-            ].join("")
-        );
-        articleContainer.append(emptyAlert);
-    }
-
-    function handleArticleSave() {
-        let articleToSave = $(this)
-            .parents(".card")
-            .data();
-        $(this)
-            .parents(".card")
-            .remove();
-
-        articleToSave.saved = true;
-        $.ajax({
-            method: "PUT",
-            url: "/api/headlines/" + articleToSave._id,
-            data: articleToSave
-        }).then(function (data) {
-            if (data.saved) {
-                initPage();
-            }
-        });
-    }
     function handleArticleScrape() {
-        $.get("api/scrape").then(function (data) {
-            initPage();
-            //bootbox.alert($("<h3 class='text-center m-top-80'>").text(data.message));
+        $.get("/scrape").then(function (data) {
+            location.reload();
         });
     }
     function handleArticleClear() {
-        $.get("api/clear").then(function () {
+        $.get("/clear").then(function () {
             articleContainer.empty();
-            initPage();
         });
     }
 });
+
+
+function handleArticleSave() {
+    // Empty the notes from the note section
+    $("#comment").empty();
+    // Save the id from the article
+    var thisId = $(this).attr("data-id");
+
+    // Now make an ajax call for the Article
+    $.ajax({
+        method: "GET",
+        url: "/articles/" + thisId
+    })
+        // With that done, add the note information to the page
+        .done(function (data) {
+            console.log(data);
+            // The title of the article
+            $("#notes").append("<h2>" + data.title + "</h2>");
+            // An input to enter a new title
+            $("#notes").append("<input id='titleinput' name='title' >");
+            // A textarea to add a new note body
+            $("#notes").append("<textarea id='bodyinput' name='body'></textarea>");
+            // A button to submit a new note, with the id of the article saved to it
+            $("#notes").append("<button data-id='" + data._id + "' id='savenote'>Save Note</button>");
+
+            // If there's a note in the article
+            if (data.note) {
+                // Place the title of the note in the title input
+                $("#titleinput").val(data.note.title);
+                // Place the body of the note in the body textarea
+                $("#bodyinput").val(data.note.body);
+            }
+        });
+};

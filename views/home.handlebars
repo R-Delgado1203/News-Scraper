@@ -1,33 +1,5 @@
-{{!-- <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-    <a class="navbar-brand" href="/">Mongo Scraper</a>
-    <button class="navbar-toggler" data-toggle="collapse" data-target="#navbarColor01" aria-controls="navbarColor01"
-        aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-
-    <div class="collapse navbar-collapse" id="navbarColor01">
-        <ul class="navbar-nav mr-auto">
-            <li class="nav-item active">
-                <a class="nav-link" href="/">Home
-                    <span class="sr-only">(current)</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="/saved">Saved Articles</a>
-            </li>
-            <li class="nav-item">
-                <a class="btn btn-danger scrape-new">SCRAPE NEW ARTICLES!</a>
-            </li>
-            <li class="nav-item">
-                <a class="btn btn-danger clear">CLEAR ARTICLES!</a>
-            </li>
-        </ul>
-    </div>
-</nav> --}}
-
 <nav>
     <div class="nav-wrapper">
-        <a href="/" class="brand-logo center">News-Scraper</a>
         <ul id="nav-mobile" class="right hide-on-med-and-down">
             <li><a class="scrape-new">Scrape Articles</a></li>
             <li><a class="clear">Clear Articles</a></li>
@@ -45,17 +17,30 @@
     </div>
     <div class="background-image">
     </div>
-    <div class="caption">
-        <h1>Mongo Scraper</h1>
-        <p>Reddit Edition</p>
+    <div class="caption center">
+        <h1>/r/News Scraper</h1>
     </div>
 </div>
-<div class="container-fluid article-container">
+{{#each article}}
+<div class="row article-container">
+    <div class="col m4"></div>
+    <div class="col m4 center">
+        <div class="card blue-grey darken-1">
+            <div class="card-content white-text">
+                <span class="card-title">{{this.title}}</span>
+            </div>
+            <div class="card-action">
+                <a href={{this.link}}>Link to article</a>
+                <a class="save"href="/saved">Save Article</a>
+            </div>
+        </div>
+    </div>
+    <div class="col m4"></div>
 </div>
+{{/each}}
 
 <footer class="footer">
     <div class="container center">
         <p>Reddit Mongo Scraper</p>
     </div>
 </footer>
-

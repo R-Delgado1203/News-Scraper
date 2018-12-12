@@ -24,34 +24,35 @@ app.engine(
 app.set("view engine", "handlebars");
 
 // scrape GET route 
-app.get("/api/scrape", (req, res) => {
-  axios.get("http://www.echojs.com/").then(function (response) {
-    const $ = cheerio.load(response.data);
-    $("article h2").each(function (i, element) {
-      let result = {};
-      result.title = $(this)
-        .children("a")
-        .text();
-      result.link = $(this)
-        .children("a")
-        .attr("href");
-      db.Article.create(result)
-        .then((dbArticle) => {
-          console.log(dbArticle);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
+app.get("/scrape", (req, res) => {
+  axios.get("https://old.reddit.com/r/news")
+    .then(function (response) {
+      const $ = cheerio.load(response.data);
+      $(".top-matter p.title").each(function (i, element) {
+        let result = {};
+        result.title = $(this)
+          .children("a.title")
+          .text();
+        result.link = $(this)
+          .children("a.title")
+          .attr("href");
+        db.Article.create(result)
+          .then((dbArticle) => {
+            console.log(dbArticle);
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      });
+      res.render("home", response);
     });
-    res.send("Scrape Complete");
-  });
 });
 
 // GET db data
 app.get("/", (req, res) => {
   db.Article.find({})
     .then((dbArticle) => {
-      let dbData = { articles: dbArticle };
+      let dbData = { article: dbArticle };
       //res.json(dbArticle);
       res.render('home', dbData);
     })
@@ -82,6 +83,18 @@ app.post("/articles/:id", function (req, res) {
       res.json(dbArticle);
     })
     .catch(function (err) {
+      res.json(err);
+    });
+});
+
+app.get("/clear", (req, res) => {
+  db.Article.remove({})
+    .then(() => {
+      /*       let dbData = { article: dbArticle };
+            //res.json(dbArticle); */
+      res.render('home');
+    })
+    .catch((err) => {
       res.json(err);
     });
 });
